@@ -1,10 +1,11 @@
 extends Node2D
 
 class Board:
-	const BoardW = 10 
-	const BoardH = 20
-	const Board2ScreenW = 100 # screen board ratio
-	const Board2ScreenH = 100 # screen board ratio
+	const BoardScale = 1
+	const BoardW = 10*BoardScale
+	const BoardH = 20*BoardScale
+	const Board2ScreenW = 100/BoardScale # screen board ratio
+	const Board2ScreenH = 100/BoardScale # screen board ratio
 	const UnitBorderSize = 2
 	func MakeUnit():
 		var tu = Polygon2D.new()
@@ -153,10 +154,10 @@ class Tetromino:
 	
 	func is_in_poslist(poslist)->bool:
 		for pos in poslist:
-			var x = pos.x / board.Board2ScreenW
-			var y = pos.y / board.Board2ScreenH
-			if !board.is_in(x,y) || !board.empty_at(x,y):
-				print("not is_in %s" %pos)
+			var xl = pos.x / board.Board2ScreenW
+			var yl = pos.y / board.Board2ScreenH
+			if !board.is_in(xl,yl) || !board.empty_at(xl,yl):
+				print("not is_in %s" % pos)
 				return false 
 		return true
 			
@@ -211,7 +212,7 @@ var TetMino
 
 func _ready() -> void:
 	randomize()
-	TetMino = Tetromino.new(self,TetBoard,4,0,Tetromino.rand_type(),0)
+	TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 #	for i in range(30):
 #		TetBoard.add_unit_to_board(
 #			TetBoard.rand_x(),TetBoard.rand_y(), 
@@ -227,7 +228,7 @@ func force_down():
 	var act_success = TetMino.move_down()
 	if !act_success:
 		TetBoard.set_to_board(TetMino)
-		TetMino = Tetromino.new(self,TetBoard,4,0,Tetromino.rand_type(),0)
+		TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 		if !TetBoard.can_set_to_board(TetMino):
 			print("game end")
 			TetBoard.clear()

@@ -6,11 +6,11 @@
 script = ExtResource("1_bc11j")
 
 [node name="ForceDownTimer" type="Timer" parent="."]
-wait_time = 0.358
+wait_time = 0.295
 autostart = true
 
 [node name="ActTimer" type="Timer" parent="."]
-wait_time = 0.111
+wait_time = 0.118
 autostart = true
 
 [connection signal="timeout" from="ForceDownTimer" to="." method="_on_force_down_timer_timeout"]
