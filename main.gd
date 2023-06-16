@@ -79,8 +79,51 @@ class Board:
 			if !is_in(x,y) || !empty_at(x,y):
 				return false
 		return true
+		
+	func scan_fulllines():
+		var fulllines = []
+		for y in BoardH:
+			var is_full=true
+			for x in BoardW:
+				if empty_at(x,y):
+					is_full= false
+					break
+			if is_full:
+				fulllines.append(y)
+		return fulllines
 					
+	func remove_fulllines(fulllines):
+		fulllines.sort()
+		fulllines.reverse()
+		for y in fulllines:
+			remove_line(y)
+			scrolldown_to_line(y)
 	
+	func remove_line(y):
+		for x in BoardW:
+			if board[x][y] != null:
+				scene.remove_child(board[x][y])
+				free_unit.push_back(board[x][y])
+				board[x][y] = null
+		
+	func scrolldown_to_line(y):
+		if y <= 0:
+			print("invalid y %d",y)
+			return
+		for yl in range( y,0,-1):
+			for x in BoardW:
+				swap(x,yl-1,x,yl)
+				
+	func swap(x1,y1,x2,y2):
+		var o1 = board[x1][y1]
+		var o2 = board[x2][y2]
+		board[x1][y1] = o2 
+		board[x2][y2] = o1
+		if o1 != null:
+			o1.position = Vector2(x2*Board2ScreenW, y2*Board2ScreenH)
+		if o2 != null:
+			o2.position = Vector2(x1*Board2ScreenW, y1*Board2ScreenH)
+		
 	func is_in(x,y)->bool:
 		return x>=0 && x< BoardW && y>=0 && y<BoardH
 		
@@ -212,17 +255,22 @@ var TetMino
 
 func _ready() -> void:
 	randomize()
-	TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
-#	for i in range(30):
-#		TetBoard.add_unit_to_board(
-#			TetBoard.rand_x(),TetBoard.rand_y(), 
-#			Tetromino.TetColor[ Tetromino.rand_type()]
-#			)
+#	TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	fill_random()
+	var fulllines = TetBoard.scan_fulllines()
+	TetBoard.remove_fulllines(fulllines)
 	pass
 
+func fill_random():
+	for i in range(10):
+		TetBoard.add_unit_to_board(
+			TetBoard.rand_x(),TetBoard.rand_y(), 
+			Tetromino.TetColor[ Tetromino.rand_type()]
+			)
+	
 
 func force_down():
 	var act_success = TetMino.move_down()
