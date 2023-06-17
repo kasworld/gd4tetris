@@ -151,15 +151,20 @@ class Board:
 	func draw_shadow_by(tulist):
 		for i in tulist.size():
 			shadow[i].position = tulist[i].position
-		while can_set_to_board(shadow):
-			for o in shadow:
-				o.position.y += Board2ScreenH
-		for o in shadow:
-			o.position.y -= Board2ScreenH
+		down_to_can(shadow)
 		show_shadow(true)
+
 	func show_shadow(b :bool):
 		for o in shadow:
 			o.visible = b
+
+	func down_to_can(tulist): # also harddrop
+		while can_set_to_board(tulist):
+			for o in tulist:
+				o.position.y += Board2ScreenH
+		for o in tulist:
+			o.position.y -= Board2ScreenH
+
 
 class Tetromino:
 	enum {TypeI,TypeT,TypeJ,TypeL,TypeS,TypeZ,TypeO,TypeEnd }
