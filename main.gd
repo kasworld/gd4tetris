@@ -301,11 +301,13 @@ func new_tetmino():
 func _ready() -> void:
 	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
 	position.y = -2*(height / (TetBoard.BoardH-TetBoard.HiddenTop))
+	$Score.position.y = -position.y
 	randomize()
 	TetMino = new_tetmino()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+#	removelinetest()
 	handle_input()
 	$Score.text = "%d" % TetBoard.score
 	pass
