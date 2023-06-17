@@ -290,8 +290,29 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-#	removelinetest()
+	if Input.is_action_just_pressed("move_right"):
+		TetMino.move_right()
+	if Input.is_action_just_pressed("move_left"):
+		TetMino.move_left()
+	if Input.is_action_pressed("move_down"):
+		TetMino.move_down()
+	if Input.is_action_just_pressed("rotate"):
+		TetMino.rotate()
+	if Input.is_action_just_pressed("hard_drop"):
+		pass
+	TetBoard.remove_fulllines()
+
 	pass
+
+func force_down():
+	var act_success = TetMino.move_down()
+	if !act_success:
+		TetBoard.set_to_board(TetMino.tulist)
+		TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
+		if !TetBoard.can_set_to_board(TetMino.tulist):
+			print("game end")
+			TetBoard.clear_board()
+
 
 func removelinetest():
 	for i in range(TetBoard.BoardW):
@@ -302,14 +323,6 @@ func removelinetest():
 #	var fulllines = TetBoard.scan_fulllines()
 	TetBoard.remove_fulllines()
 
-func force_down():
-	var act_success = TetMino.move_down()
-	if !act_success:
-		TetBoard.set_to_board(TetMino.tulist)
-		TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
-		if !TetBoard.can_set_to_board(TetMino.tulist):
-			print("game end")
-			TetBoard.clear_board()
 
 
 func act_random():
@@ -331,5 +344,5 @@ func _on_force_down_timer_timeout() -> void:
 	force_down()
 
 func _on_act_timer_timeout() -> void:
-	act_random()
-#	pass
+#	act_random()
+	pass
