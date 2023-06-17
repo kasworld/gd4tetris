@@ -286,9 +286,12 @@ var TetBoard = Board.new(self)
 
 var TetMino
 
+func new_tetmino():
+	return Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,-1,Tetromino.rand_type(),0)
+
 func _ready() -> void:
 	randomize()
-	TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
+	TetMino = new_tetmino()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -311,7 +314,7 @@ func force_down():
 	var act_success = TetMino.move_down()
 	if !act_success:
 		TetBoard.set_to_board(TetMino.tulist)
-		TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
+		TetMino = new_tetmino()
 		if !TetBoard.can_set_to_board(TetMino.tulist):
 			print("game end")
 			TetBoard.clear_board()
