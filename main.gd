@@ -22,7 +22,7 @@ class Board:
 	var scene 		# scene to draw
 	var fulllines = []
 	var shadow = []
-	var shadow_color= Color8( 0, 0, 0, 127 )
+	var shadow_color= Color.DIM_GRAY
 	func new_shadow():
 		for i in 4:
 			var o = new_unit(0,0,shadow_color)
@@ -183,13 +183,13 @@ class Tetromino:
 		TypeL: [[[0,1],[1,1],[2,1],[0,2]], [[1,0],[1,1],[1,2],[0,0]], [[0,1],[1,1],[2,1],[2,0]],  [[1,0],[1,1],[1,2],[2,2]], ],
 	}
 	const TetColor = {
-		TypeO: Color8( 255,   0, 255, 255 ),
-		TypeI: Color8( 255, 255,   0, 255 ),
-		TypeS: Color8(   0, 255, 255, 255 ),
-		TypeZ: Color8(   0,   0, 255, 255 ),
-		TypeT: Color8( 255,   0,   0, 255 ),
-		TypeJ: Color8(   0, 255,   0, 255 ),
-		TypeL: Color8( 255, 255, 255, 255 ),
+		TypeO: Color.AQUA,
+		TypeI: Color.BLUE,
+		TypeS: Color.RED,
+		TypeZ: Color.YELLOW,
+		TypeT: Color.GREEN,
+		TypeJ: Color.MAGENTA,
+		TypeL: Color.ORANGE,
 	}
 	var scene # scene to draw
 	var board : Board # board to check
