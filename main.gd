@@ -47,6 +47,7 @@ class Board:
 		for i in range(BoardW):
 			board[i] = []
 			board[i].resize(BoardH)
+		show_shadow(false)
 
 	func clear_board():
 		for row in board:
@@ -90,6 +91,7 @@ class Board:
 			add_fullline(y)
 		tulist.resize(0)
 		show_shadow(false)
+		remove_fulllines()
 
 	func can_set_to_board(tulist)->bool:
 		for tu in tulist:
@@ -290,6 +292,10 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	handle_input()
+	pass
+
+func handle_input():
 	if Input.is_action_just_pressed("move_right"):
 		TetMino.move_right()
 	if Input.is_action_just_pressed("move_left"):
@@ -299,10 +305,7 @@ func _process(delta: float) -> void:
 	if Input.is_action_just_pressed("rotate"):
 		TetMino.rotate()
 	if Input.is_action_just_pressed("hard_drop"):
-		pass
-	TetBoard.remove_fulllines()
-
-	pass
+		TetBoard.down_to_can(TetMino.tulist)
 
 func force_down():
 	var act_success = TetMino.move_down()
@@ -320,10 +323,7 @@ func removelinetest():
 			TetBoard.rand_x(),TetBoard.rand_y(),
 			Tetromino.TetColor[ Tetromino.rand_type()]
 			)
-#	var fulllines = TetBoard.scan_fulllines()
 	TetBoard.remove_fulllines()
-
-
 
 func act_random():
 	var act = randi_range(0,4)
@@ -335,8 +335,7 @@ func act_random():
 		2: # right
 			TetMino.move_right()
 		3: # down
-			pass
-#			TetMino.move_down()
+			TetMino.move_down()
 
 
 
