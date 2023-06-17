@@ -20,7 +20,7 @@ class Board:
 	var board 		# array [BoardW][BoardH] of TetUnit
 	var free_unit 	# reuse unit
 	var scene 		# scene to draw
-
+	var fulllines = []
 	func _init(s) -> void:
 		scene = s
 		free_unit = []
@@ -60,6 +60,7 @@ class Board:
 		var tu = new_unit(x,y,co)
 		scene.add_child(tu)
 		board[x][y]=tu
+		add_fullline(y)
 		return true
 
 	# 이동이 끝난 것을 보드 관리로 이관
@@ -71,6 +72,7 @@ class Board:
 			var x = tu.position.x / Board2ScreenW 
 			var y = tu.position.y / Board2ScreenH 
 			board[x][y]=tu
+			add_fullline(y)
 		tmino.tulist = []
 		
 	func can_set_to_board(tmino)->bool:
@@ -81,25 +83,27 @@ class Board:
 				return false
 		return true
 		
-	func scan_fulllines():
-		var fulllines = []
-		for y in BoardH:
-			var is_full=true
-			for x in BoardW:
-				if empty_at(x,y):
-					is_full= false
-					break
-			if is_full:
-				fulllines.append(y)
-		return fulllines
-					
-	func remove_fulllines(fulllines):
+
+	func add_fullline(y)->bool:
+		if fulllines.find(y) != -1:
+			return true
+		var is_full=true
+		for x in BoardW:
+			if empty_at(x,y):
+				is_full= false
+				break
+		if is_full:
+			fulllines.append(y)
+		return is_full		
+	
+	func remove_fulllines():
 		if fulllines.size() == 0 :
 			return
 		fulllines.sort()
 		fulllines.reverse()
 		for x in BoardW:
 			scroll_down_column(fulllines,x)
+		fulllines = []
 	
 	func fix_unitpos(x,y):
 		if board[x][y] != null:
@@ -261,8 +265,8 @@ func removelinetest():
 			TetBoard.rand_x(),TetBoard.rand_y(), 
 			Tetromino.TetColor[ Tetromino.rand_type()]
 			)
-	var fulllines = TetBoard.scan_fulllines()
-	TetBoard.remove_fulllines(fulllines)
+#	var fulllines = TetBoard.scan_fulllines()
+	TetBoard.remove_fulllines()
 
 func force_down():
 	var act_success = TetMino.move_down()
