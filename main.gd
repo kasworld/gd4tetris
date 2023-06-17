@@ -4,9 +4,9 @@ class Board:
 	const BoardScale = 1
 	const BoardW = 10*BoardScale
 	const BoardH = 20*BoardScale
-	const Board2ScreenW = 100/BoardScale # screen board ratio
-	const Board2ScreenH = 100/BoardScale # screen board ratio
-	const UnitBorderSize = Board2ScreenW / 50
+	var Board2ScreenW  # screen board ratio
+	var Board2ScreenH  # screen board ratio
+	var UnitBorderSize 
 	func MakeUnit():
 		var tu = Polygon2D.new()
 		tu.set_polygon( PackedVector2Array([
@@ -22,10 +22,15 @@ class Board:
 	var scene 		# scene to draw
 	var fulllines = []
 	func _init(s) -> void:
+		var width = ProjectSettings.get_setting("display/window/size/viewport_width")
+		var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
+		Board2ScreenW = width / BoardW
+		Board2ScreenH = height / BoardH
+		UnitBorderSize = max(Board2ScreenW / 20,1)
 		scene = s
 		free_unit = []
 		new_board()	
-	
+			
 	func new_board():
 		board = []
 		board.resize(BoardW)
@@ -256,6 +261,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
+	print(int(1/delta))
 	removelinetest()
 	pass
 
