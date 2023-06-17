@@ -6,7 +6,7 @@ class Board:
 	const BoardH = 20*BoardScale
 	const Board2ScreenW = 100/BoardScale # screen board ratio
 	const Board2ScreenH = 100/BoardScale # screen board ratio
-	const UnitBorderSize = 2
+	const UnitBorderSize = Board2ScreenW / 50
 	func MakeUnit():
 		var tu = Polygon2D.new()
 		tu.set_polygon( PackedVector2Array([
@@ -51,15 +51,16 @@ class Board:
 		tu.position.y = y * Board2ScreenH
 		tu.set_color(co )
 		return tu
-
+		
 	# 장애물 미리 설정할때 사용.
-	func add_unit_to_board(x,y,co):
+	func add_unit_to_board(x,y,co)->bool:
 		if !is_in(x,y) || !empty_at(x,y):
-			print("fail to add_unit_to_board %d %d %s" %[x, y, co])
-			return 
+#			print("fail to add_unit_to_board %d %d %s" %[x, y, co])
+			return false
 		var tu = new_unit(x,y,co)
 		scene.add_child(tu)
 		board[x][y]=tu
+		return true
 
 	# 이동이 끝난 것을 보드 관리로 이관
 	func set_to_board(tmino):
@@ -93,37 +94,29 @@ class Board:
 		return fulllines
 					
 	func remove_fulllines(fulllines):
+		if fulllines.size() == 0 :
+			return
 		fulllines.sort()
 		fulllines.reverse()
-		for y in fulllines:
-			remove_line(y)
-			scrolldown_to_line(y)
-	
-	func remove_line(y):
 		for x in BoardW:
-			if board[x][y] != null:
-				scene.remove_child(board[x][y])
-				free_unit.push_back(board[x][y])
-				board[x][y] = null
-		
-	func scrolldown_to_line(y):
-		if y <= 0:
-			print("invalid y %d",y)
-			return
-		for yl in range( y,0,-1):
-			for x in BoardW:
-				swap(x,yl-1,x,yl)
-				
-	func swap(x1,y1,x2,y2):
-		var o1 = board[x1][y1]
-		var o2 = board[x2][y2]
-		board[x1][y1] = o2 
-		board[x2][y2] = o1
-		if o1 != null:
-			o1.position = Vector2(x2*Board2ScreenW, y2*Board2ScreenH)
-		if o2 != null:
-			o2.position = Vector2(x1*Board2ScreenW, y1*Board2ScreenH)
-		
+			scroll_down_column(fulllines,x)
+	
+	func fix_unitpos(x,y):
+		if board[x][y] != null:
+			board[x][y].position = Vector2(x*Board2ScreenW, y*Board2ScreenH)
+			
+	func scroll_down_column(fulllines,x):
+		var fillarray = []
+		fillarray.resize(fulllines.size())
+		for yl in fulllines:
+			if board[x][yl] != null:
+				scene.remove_child(board[x][yl])
+				free_unit.push_back(board[x][yl])
+			board[x].remove_at(yl)
+		board[x] = fillarray.duplicate() + board[x]
+		for yl in range(fulllines.size(),fulllines[0]+1):
+			fix_unitpos(x,yl)
+	
 	func is_in(x,y)->bool:
 		return x>=0 && x< BoardW && y>=0 && y<BoardH
 		
@@ -259,18 +252,17 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	fill_random()
-	var fulllines = TetBoard.scan_fulllines()
-	TetBoard.remove_fulllines(fulllines)
+	removelinetest()
 	pass
 
-func fill_random():
-	for i in range(10):
+func removelinetest():
+	for i in range(TetBoard.BoardW):
 		TetBoard.add_unit_to_board(
 			TetBoard.rand_x(),TetBoard.rand_y(), 
 			Tetromino.TetColor[ Tetromino.rand_type()]
 			)
-	
+	var fulllines = TetBoard.scan_fulllines()
+	TetBoard.remove_fulllines(fulllines)
 
 func force_down():
 	var act_success = TetMino.move_down()
@@ -302,4 +294,5 @@ func _on_force_down_timer_timeout() -> void:
 
 
 func _on_act_timer_timeout() -> void:
-	act_random()
+	pass
+#	act_random()
