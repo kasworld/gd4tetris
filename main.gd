@@ -11,9 +11,9 @@ class Board:
 		var tu = Polygon2D.new()
 		tu.set_polygon( PackedVector2Array([
 			Vector2(UnitBorderSize,UnitBorderSize),
-			Vector2(UnitBorderSize,Board2ScreenH-UnitBorderSize),
-			Vector2(Board2ScreenW-UnitBorderSize,Board2ScreenH-UnitBorderSize),
-			Vector2(Board2ScreenW-UnitBorderSize,UnitBorderSize),]
+			Vector2(UnitBorderSize,Board2ScreenH),
+			Vector2(Board2ScreenW,Board2ScreenH),
+			Vector2(Board2ScreenW,UnitBorderSize),]
 		))
 		return tu
 	
@@ -107,14 +107,10 @@ class Board:
 		fulllines.sort()
 		fulllines.reverse()
 		for x in BoardW:
-			scroll_down_column(fulllines,x)
+			scroll_down_column(x)
 		fulllines = []
-	
-	func fix_unitpos(x,y):
-		if board[x][y] != null:
-			board[x][y].position = Vector2(x*Board2ScreenW, y*Board2ScreenH)
-			
-	func scroll_down_column(fulllines,x):
+
+	func scroll_down_column(x):
 		var fillarray = []
 		fillarray.resize(fulllines.size())
 		for yl in fulllines:
@@ -125,6 +121,10 @@ class Board:
 		board[x] = fillarray.duplicate() + board[x]
 		for yl in range(fulllines.size(),fulllines[0]+1):
 			fix_unitpos(x,yl)
+	
+	func fix_unitpos(x,y):
+		if board[x][y] != null:
+			board[x][y].position = Vector2(x*Board2ScreenW, y*Board2ScreenH)
 	
 	func is_in(x,y)->bool:
 		return x>=0 && x< BoardW && y>=0 && y<BoardH
@@ -261,7 +261,7 @@ func _ready() -> void:
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	print(int(1/delta))
+#	print(int(1/delta))
 	removelinetest()
 	pass
 
