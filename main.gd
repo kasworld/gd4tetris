@@ -21,6 +21,15 @@ class Board:
 	var free_unit 	# reuse unit
 	var scene 		# scene to draw
 	var fulllines = []
+	var shadow = []
+	var shadow_color= Color8( 0, 0, 0, 127 )
+	func new_shadow():
+		for i in 4:
+			var o = new_unit(0,0,shadow_color)
+			shadow.append(o)
+			scene.add_child(o)
+		show_shadow(false)
+
 	func _init(s) -> void:
 		var width = ProjectSettings.get_setting("display/window/size/viewport_width")
 		var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
@@ -29,6 +38,7 @@ class Board:
 		UnitBorderSize = max(Board2ScreenW / 20,1)
 		scene = s
 		free_unit = []
+		new_shadow()
 		new_board()
 
 	func new_board():
@@ -69,19 +79,20 @@ class Board:
 		return true
 
 	# 이동이 끝난 것을 보드 관리로 이관
-	func set_to_board(tmino):
-		if !can_set_to_board(tmino):
-			print("fail to set_to_board ",tmino)
+	func set_to_board(tulist):
+		if !can_set_to_board(tulist):
+			print("fail to set_to_board ",tulist)
 			return
-		for tu in tmino.tulist:
+		for tu in tulist:
 			var x = tu.position.x / Board2ScreenW
 			var y = tu.position.y / Board2ScreenH
 			board[x][y]=tu
 			add_fullline(y)
-		tmino.tulist = []
+		tulist.resize(0)
+		show_shadow(false)
 
-	func can_set_to_board(tmino)->bool:
-		for tu in tmino.tulist:
+	func can_set_to_board(tulist)->bool:
+		for tu in tulist:
 			var x = tu.position.x / Board2ScreenW
 			var y = tu.position.y / Board2ScreenH
 			if !is_in(x,y) || !empty_at(x,y):
@@ -138,6 +149,16 @@ class Board:
 	func rand_y():
 		return randi_range(0,BoardH)
 
+	func draw_shadow_by(tulist):
+		for i in tulist.size():
+			shadow[i].position = tulist[i].position
+		for o in shadow:
+			o.position.y += Board2ScreenH
+		show_shadow(true)
+	func show_shadow(b :bool):
+		for o in shadow:
+			o.visible = b
+
 class Tetromino:
 	enum {TypeI,TypeT,TypeJ,TypeL,TypeS,TypeZ,TypeO,TypeEnd }
 	static func rand_type():
@@ -181,8 +202,7 @@ class Tetromino:
 			var tu = board.new_unit(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			scene.add_child(tu)
-
-
+		board.draw_shadow_by(tulist)
 	func geo_by_rotate(ra):
 		var geo = TetGeo[t]
 		return geo[ra%len(geo)]
@@ -212,6 +232,7 @@ class Tetromino:
 			poslist[i].x -= board.Board2ScreenW
 		if is_in_poslist(poslist):
 			poslist2tulist(poslist)
+			board.draw_shadow_by(tulist)
 			return true
 		return false
 
@@ -221,6 +242,7 @@ class Tetromino:
 			poslist[i].x += board.Board2ScreenW
 		if is_in_poslist(poslist):
 			poslist2tulist(poslist)
+			board.draw_shadow_by(tulist)
 			return true
 		return false
 
@@ -230,6 +252,7 @@ class Tetromino:
 			poslist[i].y += board.Board2ScreenH
 		if is_in_poslist(poslist):
 			poslist2tulist(poslist)
+			board.draw_shadow_by(tulist)
 			return true
 		return false
 
@@ -245,6 +268,7 @@ class Tetromino:
 		if is_in_poslist(poslist):
 			poslist2tulist(poslist)
 			r+=1
+			board.draw_shadow_by(tulist)
 			return true
 		return false
 
@@ -255,10 +279,11 @@ var TetMino
 
 func _ready() -> void:
 	randomize()
+	TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	removelinetest()
+#	removelinetest()
 	pass
 
 func removelinetest():
@@ -273,9 +298,9 @@ func removelinetest():
 func force_down():
 	var act_success = TetMino.move_down()
 	if !act_success:
-		TetBoard.set_to_board(TetMino)
+		TetBoard.set_to_board(TetMino.tulist)
 		TetMino = Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
-		if !TetBoard.can_set_to_board(TetMino):
+		if !TetBoard.can_set_to_board(TetMino.tulist):
 			print("game end")
 			TetBoard.clear_board()
 
@@ -299,5 +324,5 @@ func _on_force_down_timer_timeout() -> void:
 	force_down()
 
 func _on_act_timer_timeout() -> void:
-	pass
-#	act_random()
+	act_random()
+#	pass
