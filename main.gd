@@ -1,9 +1,10 @@
 extends Node2D
 
 class Board:
+	const HiddenTop = 2
 	const BoardScale = 1
 	const BoardW = 10*BoardScale
-	const BoardH = 20*BoardScale
+	const BoardH = 20*BoardScale+HiddenTop
 	var Board2ScreenW  # screen board ratio
 	var Board2ScreenH  # screen board ratio
 	var UnitBorderSize
@@ -23,6 +24,7 @@ class Board:
 	var fulllines = []
 	var shadow = []
 	var shadow_color= Color.DIM_GRAY
+	var score
 	func new_shadow():
 		for i in 4:
 			var o = new_unit(0,0,shadow_color)
@@ -34,7 +36,7 @@ class Board:
 		var width = ProjectSettings.get_setting("display/window/size/viewport_width")
 		var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
 		Board2ScreenW = width / BoardW
-		Board2ScreenH = height / BoardH
+		Board2ScreenH = height / (BoardH-HiddenTop)
 		UnitBorderSize = max(Board2ScreenW / 20,1)
 		scene = s
 		free_unit = []
@@ -42,6 +44,7 @@ class Board:
 		new_board()
 
 	func new_board():
+		score = 0
 		board = []
 		board.resize(BoardW)
 		for i in range(BoardW):
@@ -91,6 +94,7 @@ class Board:
 			add_fullline(y)
 		tulist.resize(0)
 		show_shadow(false)
+		score += 4
 		remove_fulllines()
 
 	func can_set_to_board(tulist)->bool:
@@ -116,6 +120,11 @@ class Board:
 	func remove_fulllines():
 		if fulllines.size() == 0 :
 			return
+		var sc = 0
+		for i in fulllines:
+			sc += (BoardH- i) *4
+		score += sc* fulllines.size()
+
 		fulllines.sort()
 		fulllines.reverse()
 		for x in BoardW:
@@ -287,15 +296,18 @@ var TetBoard = Board.new(self)
 var TetMino
 
 func new_tetmino():
-	return Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,-1,Tetromino.rand_type(),0)
+	return Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 
 func _ready() -> void:
+	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
+	position.y = -2*(height / (TetBoard.BoardH-TetBoard.HiddenTop))
 	randomize()
 	TetMino = new_tetmino()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	handle_input()
+	$Score.text = "%d" % TetBoard.score
 	pass
 
 func handle_input():
@@ -312,12 +324,13 @@ func handle_input():
 
 
 func force_down():
+	$GameOver.visible = false
 	var act_success = TetMino.move_down()
 	if !act_success:
 		TetBoard.set_to_board(TetMino.tulist)
 		TetMino = new_tetmino()
 		if !TetBoard.can_set_to_board(TetMino.tulist):
-			print("game end")
+			$GameOver.visible = true
 			TetBoard.clear_board()
 
 func _on_force_down_timer_timeout() -> void:
