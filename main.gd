@@ -99,7 +99,6 @@ class Board:
 				return false
 		return true
 
-
 	func add_fullline(y)->bool:
 		if fulllines.find(y) != -1:
 			return true
@@ -152,8 +151,11 @@ class Board:
 	func draw_shadow_by(tulist):
 		for i in tulist.size():
 			shadow[i].position = tulist[i].position
+		while can_set_to_board(shadow):
+			for o in shadow:
+				o.position.y += Board2ScreenH
 		for o in shadow:
-			o.position.y += Board2ScreenH
+			o.position.y -= Board2ScreenH
 		show_shadow(true)
 	func show_shadow(b :bool):
 		for o in shadow:
