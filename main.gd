@@ -310,6 +310,7 @@ func handle_input():
 	if Input.is_action_just_pressed("hard_drop"):
 		TetBoard.down_to_can(TetMino.tulist)
 
+
 func force_down():
 	var act_success = TetMino.move_down()
 	if !act_success:
@@ -319,6 +320,10 @@ func force_down():
 			print("game end")
 			TetBoard.clear_board()
 
+func _on_force_down_timer_timeout() -> void:
+	force_down()
+
+############# test functions
 
 func removelinetest():
 	for i in range(TetBoard.BoardW):
@@ -339,12 +344,3 @@ func act_random():
 			TetMino.move_right()
 		3: # down
 			TetMino.move_down()
-
-
-
-func _on_force_down_timer_timeout() -> void:
-	force_down()
-
-func _on_act_timer_timeout() -> void:
-#	act_random()
-	pass
