@@ -5,6 +5,8 @@ class Board extends Node2D:
 	const BoardScale = 1
 	const BoardW = 10*BoardScale
 	const BoardH = 20*BoardScale+HiddenTop
+	const shadow_color= Color.DIM_GRAY
+
 	var Board2ScreenW  :int # screen board ratio
 	var Board2ScreenH  :int # screen board ratio
 	var UnitBorderSize :int
@@ -18,11 +20,10 @@ class Board extends Node2D:
 		))
 		return tu
 
-	var board 		# array [BoardW][BoardH] of TetUnit
-	var free_unit 	# reuse unit
+	var board = []		# array [BoardW][BoardH] of TetUnit
+	var free_unit = []	# reuse unit
 	var fulllines = []
 	var shadow = []
-	var shadow_color= Color.DIM_GRAY
 	var score :int
 	func new_shadow()->void:
 		for i in 4:
@@ -31,18 +32,16 @@ class Board extends Node2D:
 			add_child(o)
 		show_shadow(false)
 
-	func _init(width,height) -> void:
+	func _init(width :int,height :int) -> void:
 		super._init()
 		Board2ScreenW = width / BoardW
 		Board2ScreenH = height / BoardH
 		UnitBorderSize = max(Board2ScreenW / 20,1)
-		free_unit = []
 		new_shadow()
 		new_board()
 
 	func new_board()->void:
 		score = 0
-		board = []
 		board.resize(BoardW)
 		for i in range(BoardW):
 			board[i] = []
@@ -57,7 +56,7 @@ class Board extends Node2D:
 					free_unit.push_back(o)
 		new_board()
 
-	func new_unit(x,y,co)->Polygon2D:
+	func new_unit(x :int,y :int,co :Color)->Polygon2D:
 		var tu
 		if len(free_unit) == 0 :
 			tu =  MakeUnit()
@@ -69,7 +68,7 @@ class Board extends Node2D:
 		return tu
 
 	# 장애물 미리 설정할때 사용.
-	func add_unit_to_board(x,y,co)->bool:
+	func add_unit_to_board(x :int,y :int,co :Color)->bool:
 		if !is_in(x,y) || !empty_at(x,y):
 #			print("fail to add_unit_to_board %d %d %s" %[x, y, co])
 			return false
@@ -80,7 +79,7 @@ class Board extends Node2D:
 		return true
 
 	# 이동이 끝난 것을 보드 관리로 이관
-	func set_to_board(tulist)->void:
+	func set_to_board(tulist :Array)->void:
 		if !can_set_to_board(tulist):
 			print("fail to set_to_board ",tulist)
 			return
@@ -94,7 +93,7 @@ class Board extends Node2D:
 		score += 4
 		remove_fulllines()
 
-	func can_set_to_board(tulist)->bool:
+	func can_set_to_board(tulist :Array)->bool:
 		for tu in tulist:
 			var x = tu.position.x / Board2ScreenW
 			var y = tu.position.y / Board2ScreenH
@@ -102,7 +101,7 @@ class Board extends Node2D:
 				return false
 		return true
 
-	func add_fullline(y)->bool:
+	func add_fullline(y :int)->bool:
 		if fulllines.find(y) != -1:
 			return true
 		var is_full=true
@@ -128,7 +127,7 @@ class Board extends Node2D:
 			scroll_down_column(x)
 		fulllines = []
 
-	func scroll_down_column(x)->void:
+	func scroll_down_column(x :int)->void:
 		var fillarray = []
 		fillarray.resize(fulllines.size())
 		for yl in fulllines:
@@ -140,14 +139,14 @@ class Board extends Node2D:
 		for yl in range(fulllines.size(),fulllines[0]+1):
 			fix_unitpos(x,yl)
 
-	func fix_unitpos(x,y)->void:
+	func fix_unitpos(x :int,y :int)->void:
 		if board[x][y] != null:
 			board[x][y].position = Vector2(x*Board2ScreenW, y*Board2ScreenH)
 
-	func is_in(x,y)->bool:
+	func is_in(x :int,y :int)->bool:
 		return x>=0 && x< BoardW && y>=0 && y<BoardH
 
-	func empty_at(x,y)->bool:
+	func empty_at(x :int,y :int)->bool:
 		return board[x][y] == null
 
 	func rand_x()->int:
@@ -156,7 +155,7 @@ class Board extends Node2D:
 	func rand_y()->int:
 		return randi_range(0,BoardH)
 
-	func draw_shadow_by(tulist)->void:
+	func draw_shadow_by(tulist :Array)->void:
 		for i in tulist.size():
 			shadow[i].position = tulist[i].position
 		down_to_can(shadow)
@@ -166,7 +165,7 @@ class Board extends Node2D:
 		for o in shadow:
 			o.visible = b
 
-	func down_to_can(tulist)->void: # also harddrop
+	func down_to_can(tulist :Array)->void: # also harddrop
 		while can_set_to_board(tulist):
 			for o in tulist:
 				o.position.y += Board2ScreenH
@@ -203,7 +202,7 @@ class Tetromino:
 	var y: int  # y in board
 	var t: int  # tet type
 	var r: int  # rotate state
-	func _init(b, xa,ya,ta,ra)->void:
+	func _init(b :Board, xa :int,ya :int,ta :int,ra :int)->void:
 		board = b
 		x = xa
 		y = ya
@@ -217,21 +216,21 @@ class Tetromino:
 			board.add_child(tu)
 		board.draw_shadow_by(tulist)
 
-	func geo_by_rotate(ra):
+	func geo_by_rotate(ra :int)->Array:
 		var geo = TetGeo[t]
 		return geo[ra%len(geo)]
 
-	func tulist2poslist():
+	func tulist2poslist()->Array:
 		var poslist = []
 		for tu in tulist:
 			poslist.append(tu.position)
 		return poslist
 
-	func poslist2tulist(poslist)->void:
+	func poslist2tulist(poslist :Array)->void:
 		for i in tulist.size():
 			tulist[i].position = poslist[i]
 
-	func is_in_poslist(poslist)->bool:
+	func is_in_poslist(poslist :Array)->bool:
 		for pos in poslist:
 			var xl = pos.x / board.Board2ScreenW
 			var yl = pos.y / board.Board2ScreenH
