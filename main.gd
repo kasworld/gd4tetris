@@ -33,7 +33,6 @@ class Board extends Node2D:
 		show_shadow(false)
 
 	func _init(width :int,height :int) -> void:
-		super._init()
 		Board2ScreenW = width / BoardW
 		Board2ScreenH = height / BoardH
 		UnitBorderSize = max(Board2ScreenW / 20,1)
@@ -235,7 +234,7 @@ class Tetromino:
 			var xl = pos.x / board.Board2ScreenW
 			var yl = pos.y / board.Board2ScreenH
 			if !board.is_in(xl,yl) || !board.empty_at(xl,yl):
-				print("not is_in %s" % pos)
+#				print("not is_in %s" % pos)
 				return false
 		return true
 
