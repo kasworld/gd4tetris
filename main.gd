@@ -210,9 +210,9 @@ class Tetromino extends Node2D:
 		y = ya
 		t = ta
 		r = ra
-		var geo = TetGeo[t]
+		var geo = geo_by_rotate(r)
 		var co = TetColor[t]
-		for p in geo[r%geo.size()]:
+		for p in geo:
 			var tu = board.new_unit(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			board.add_child(tu)
@@ -222,26 +222,26 @@ class Tetromino extends Node2D:
 		y = ya
 		t = tmino.t
 		r = tmino.r
-		var geo = TetGeo[t]
+		var geo = geo_by_rotate(r)
 		var co = TetColor[t]
-		for p in geo[r%len(geo)]:
+		for p in geo:
 			var tu = board.new_unit(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			board.add_child(tu)
 
 	func change_type(ta :int):
 		t = ta
-		var geo = TetGeo[t]
+		var geo = geo_by_rotate(r)
 		var co = TetColor[t]
 		for i in tulist.size():
-			var g = geo[r%geo.size()][i]
+			var g = geo[i]
 			tulist[i].position.x = (x+g[0]) * board.board2screenW
 			tulist[i].position.y = (y+g[1]) * board.board2screenH
 			tulist[i].set_color(co)
 
 	func geo_by_rotate(ra :int)->Array:
 		var geo = TetGeo[t]
-		return geo[ra%len(geo)]
+		return geo[ra%geo.size()]
 
 	func tulist2poslist()->Array:
 		var poslist = []
