@@ -2,21 +2,20 @@ extends Node2D
 
 class Board extends Node2D:
 	const HiddenTop = 2
-	const BoardScale = 1
-	const BoardW = 10*BoardScale
-	const BoardH = 20*BoardScale+HiddenTop
+	const BoardW = 10
+	const BoardH = 20+HiddenTop
 	const ShadowColor = Color.DIM_GRAY
+	const UnitBorderSize = 4
 
 	var board2screenW  :int # screen board ratio
 	var board2screenH  :int # screen board ratio
-	var unit_border_size :int
 	func make_unit()->Polygon2D:
 		var tu = Polygon2D.new()
 		tu.set_polygon( PackedVector2Array([
-			Vector2(unit_border_size,unit_border_size),
-			Vector2(unit_border_size,board2screenH),
+			Vector2(UnitBorderSize,UnitBorderSize),
+			Vector2(UnitBorderSize,board2screenH),
 			Vector2(board2screenW,board2screenH),
-			Vector2(board2screenW,unit_border_size),]
+			Vector2(board2screenW,UnitBorderSize),]
 		))
 		return tu
 
@@ -35,7 +34,6 @@ class Board extends Node2D:
 	func _init(width :int,height :int) -> void:
 		board2screenW = width / BoardW
 		board2screenH = height / BoardH
-		unit_border_size = max(board2screenW / 20,1)
 		new_shadow()
 		new_board()
 
