@@ -77,6 +77,7 @@ class Board extends Node2D:
 		add_fullline(y)
 		return true
 
+
 	# 이동이 끝난 것을 보드 관리로 이관
 	func set_to_board(tulist :Array)->void:
 		if !can_set_to_board(tulist):
@@ -213,10 +214,32 @@ class Tetromino extends Node2D:
 		r = ra
 		var geo = TetGeo[t]
 		var co = TetColor[t]
+		for p in geo[r%geo.size()]:
+			var tu = board.new_unit(x+p[0],y+p[1], co)
+			tulist.append(tu)
+			board.add_child(tu)
+
+	func copy_tmino_from_next( xa :int,ya :int, tmino)->void:
+		x = xa
+		y = ya
+		t = tmino.t
+		r = tmino.r
+		var geo = TetGeo[t]
+		var co = TetColor[t]
 		for p in geo[r%len(geo)]:
 			var tu = board.new_unit(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			board.add_child(tu)
+
+	func change_type(ta :int):
+		t = ta
+		var geo = TetGeo[t]
+		var co = TetColor[t]
+		for i in tulist.size():
+			var g = geo[r%geo.size()][i]
+			tulist[i].position.x = (x+g[0]) * board.board2screenW
+			tulist[i].position.y = (y+g[1]) * board.board2screenH
+			tulist[i].set_color(co)
 
 	func geo_by_rotate(ra :int)->Array:
 		var geo = TetGeo[t]
@@ -289,15 +312,11 @@ class Tetromino extends Node2D:
 
 
 var tet_board :Board
-var tet_mino :Tetromino
+var tet_mino_move :Tetromino
 var tet_mino_next :Tetromino
 
-func make_tmino_move()->void:
-	tet_mino.make_tmino(tet_board.BoardW/2-1,0,Tetromino.rand_type(),0)
-
-func make_tmino_next()->void:
-	tet_mino_next.make_tmino(tet_board.BoardW+1,4,Tetromino.rand_type(),0)
-
+func copy_tmino_move_from_next()->void:
+	tet_mino_move.copy_tmino_from_next(tet_board.BoardW/2-1,0,tet_mino_next)
 
 func _ready() -> void:
 	randomize()
@@ -317,10 +336,12 @@ func _ready() -> void:
 	$Score.position.x = boardWidth + tet_board.board2screenW *2
 	$Score.position.y = tet_board.board2screenH *0
 
-	tet_mino = Tetromino.new(self, tet_board)
 	tet_mino_next = Tetromino.new(self, tet_board)
-	make_tmino_move()
-	make_tmino_next()
+	tet_mino_next.make_tmino(tet_board.BoardW+1,4,Tetromino.rand_type(),0)
+	tet_mino_move = Tetromino.new(self, tet_board)
+	copy_tmino_move_from_next()
+	tet_mino_next.change_type(Tetromino.rand_type())
+
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -332,24 +353,25 @@ func _process(delta: float) -> void:
 
 func handle_input()->void:
 	if Input.is_action_just_pressed("move_right"):
-		tet_mino.move_right()
+		tet_mino_move.move_right()
 	if Input.is_action_just_pressed("move_left"):
-		tet_mino.move_left()
+		tet_mino_move.move_left()
 	if Input.is_action_pressed("move_down"):
-		tet_mino.move_down()
+		tet_mino_move.move_down()
 	if Input.is_action_just_pressed("rotate"):
-		tet_mino.tmino_rotate()
+		tet_mino_move.tmino_rotate()
 	if Input.is_action_just_pressed("hard_drop"):
-		tet_board.down_to_can(tet_mino.tulist)
+		tet_board.down_to_can(tet_mino_move.tulist)
 
 
 func force_down()->void:
 	$GameOver.visible = false
-	var act_success = tet_mino.move_down()
+	var act_success = tet_mino_move.move_down()
 	if !act_success:
-		tet_board.set_to_board(tet_mino.tulist)
-		make_tmino_move()
-		if !tet_board.can_set_to_board(tet_mino.tulist):
+		tet_board.set_to_board(tet_mino_move.tulist)
+		copy_tmino_move_from_next()
+		tet_mino_next.change_type(Tetromino.rand_type())
+		if !tet_board.can_set_to_board(tet_mino_move.tulist):
 			$GameOver.visible = true
 			tet_board.clear_board()
 
@@ -370,10 +392,10 @@ func act_random()->void:
 	var act = randi_range(0,4)
 	match act:
 		0: # rotate
-			tet_mino.tmino_rotate()
+			tet_mino_move.tmino_rotate()
 		1: # left
-			tet_mino.move_left()
+			tet_mino_move.move_left()
 		2: # right
-			tet_mino.move_right()
+			tet_mino_move.move_right()
 		3: # down
-			tet_mino.move_down()
+			tet_mino_move.move_down()
