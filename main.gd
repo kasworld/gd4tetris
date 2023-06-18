@@ -5,28 +5,28 @@ class Board extends Node2D:
 	const BoardW = 10
 	const BoardH = 20+HiddenTop
 	const ShadowColor = Color.DIM_GRAY
-	const UnitBorderSize = 4
+	const TuBorderSize = 4
 
 	var board2screenW  :int # screen board ratio
 	var board2screenH  :int # screen board ratio
-	func make_unit()->Polygon2D:
+	func make_tu()->Polygon2D:
 		var tu = Polygon2D.new()
 		tu.set_polygon( PackedVector2Array([
-			Vector2(UnitBorderSize,UnitBorderSize),
-			Vector2(UnitBorderSize,board2screenH),
+			Vector2(TuBorderSize,TuBorderSize),
+			Vector2(TuBorderSize,board2screenH),
 			Vector2(board2screenW,board2screenH),
-			Vector2(board2screenW,UnitBorderSize),]
+			Vector2(board2screenW,TuBorderSize),]
 		))
 		return tu
 
 	var board = []		# array [BoardW][BoardH] of TetUnit
-	var free_unit = []	# reuse unit
+	var free_tulist = []	# reuse tetunit list
 	var fulllines = []
 	var shadow = []
 	var score :int
 	func new_shadow()->void:
 		for i in 4:
-			var o = new_unit(0,0,ShadowColor )
+			var o = new_tu(0,0,ShadowColor )
 			shadow.append(o)
 			add_child(o)
 		show_shadow(false)
@@ -50,26 +50,26 @@ class Board extends Node2D:
 			for o in row:
 				if o != null:
 					remove_child(o)
-					free_unit.push_back(o)
+					free_tulist.push_back(o)
 		new_board()
 
-	func new_unit(x :int,y :int,co :Color)->Polygon2D:
+	func new_tu(x :int,y :int,co :Color)->Polygon2D:
 		var tu
-		if len(free_unit) == 0 :
-			tu =  make_unit()
+		if len(free_tulist) == 0 :
+			tu =  make_tu()
 		else:
-			tu = free_unit.pop_back()
+			tu = free_tulist.pop_back()
 		tu.position.x = x * board2screenW
 		tu.position.y = y * board2screenH
 		tu.set_color(co )
 		return tu
 
 	# 장애물 미리 설정할때 사용.
-	func add_unit_to_board(x :int,y :int,co :Color)->bool:
+	func add_tu_to_board(x :int,y :int,co :Color)->bool:
 		if !is_in(x,y) || !empty_at(x,y):
-#			print("fail to add_unit_to_board %d %d %s" %[x, y, co])
+#			print("fail to add_tu_to_board %d %d %s" %[x, y, co])
 			return false
-		var tu = new_unit(x,y,co)
+		var tu = new_tu(x,y,co)
 		add_child(tu)
 		board[x][y]=tu
 		add_fullline(y)
@@ -131,13 +131,13 @@ class Board extends Node2D:
 		for yl in fulllines:
 			if board[x][yl] != null:
 				remove_child(board[x][yl])
-				free_unit.push_back(board[x][yl])
+				free_tulist.push_back(board[x][yl])
 			board[x].remove_at(yl)
 		board[x] = fillarray.duplicate() + board[x]
 		for yl in range(fulllines.size(),fulllines[0]+1):
-			fix_unitpos(x,yl)
+			fix_tupos(x,yl)
 
-	func fix_unitpos(x :int,y :int)->void:
+	func fix_tupos(x :int,y :int)->void:
 		if board[x][y] != null:
 			board[x][y].position = Vector2(x*board2screenW, y*board2screenH)
 
@@ -213,7 +213,7 @@ class Tetromino extends Node2D:
 		var geo = geo_by_rotate(r)
 		var co = TetColor[t]
 		for p in geo:
-			var tu = board.new_unit(x+p[0],y+p[1], co)
+			var tu = board.new_tu(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			board.add_child(tu)
 
@@ -225,7 +225,7 @@ class Tetromino extends Node2D:
 		var geo = geo_by_rotate(r)
 		var co = TetColor[t]
 		for p in geo:
-			var tu = board.new_unit(x+p[0],y+p[1], co)
+			var tu = board.new_tu(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			board.add_child(tu)
 
@@ -380,7 +380,7 @@ func _on_force_down_timer_timeout() -> void:
 
 func removelinetest()->void:
 	for i in range(tet_board.BoardW):
-		tet_board.add_unit_to_board(
+		tet_board.add_tu_to_board(
 			tet_board.rand_x(),tet_board.rand_y(),
 			Tetromino.TetColor[ Tetromino.rand_type()]
 			)
