@@ -1,6 +1,6 @@
 extends Node2D
 
-class Board:
+class Board extends Node2D:
 	const HiddenTop = 2
 	const BoardScale = 1
 	const BoardW = 10*BoardScale
@@ -20,7 +20,6 @@ class Board:
 
 	var board 		# array [BoardW][BoardH] of TetUnit
 	var free_unit 	# reuse unit
-	var scene 		# scene to draw
 	var fulllines = []
 	var shadow = []
 	var shadow_color= Color.DIM_GRAY
@@ -29,16 +28,14 @@ class Board:
 		for i in 4:
 			var o = new_unit(0,0,shadow_color)
 			shadow.append(o)
-			scene.add_child(o)
+			add_child(o)
 		show_shadow(false)
 
-	func _init(s) -> void:
-		var width = ProjectSettings.get_setting("display/window/size/viewport_width")
-		var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
+	func _init(width,height) -> void:
+		super._init()
 		Board2ScreenW = width / BoardW
-		Board2ScreenH = height / (BoardH-HiddenTop)
+		Board2ScreenH = height / BoardH
 		UnitBorderSize = max(Board2ScreenW / 20,1)
-		scene = s
 		free_unit = []
 		new_shadow()
 		new_board()
@@ -56,7 +53,7 @@ class Board:
 		for row in board:
 			for o in row:
 				if o != null:
-					scene.remove_child(o)
+					remove_child(o)
 					free_unit.push_back(o)
 		new_board()
 
@@ -77,7 +74,7 @@ class Board:
 #			print("fail to add_unit_to_board %d %d %s" %[x, y, co])
 			return false
 		var tu = new_unit(x,y,co)
-		scene.add_child(tu)
+		add_child(tu)
 		board[x][y]=tu
 		add_fullline(y)
 		return true
@@ -136,7 +133,7 @@ class Board:
 		fillarray.resize(fulllines.size())
 		for yl in fulllines:
 			if board[x][yl] != null:
-				scene.remove_child(board[x][yl])
+				remove_child(board[x][yl])
 				free_unit.push_back(board[x][yl])
 			board[x].remove_at(yl)
 		board[x] = fillarray.duplicate() + board[x]
@@ -200,15 +197,13 @@ class Tetromino:
 		TypeJ: Color.MAGENTA,
 		TypeL: Color.ORANGE,
 	}
-	var scene # scene to draw
 	var board : Board # board to check
 	var tulist = []
 	var x : int # x in board
 	var y: int  # y in board
 	var t: int  # tet type
 	var r: int  # rotate state
-	func _init(s,b, xa,ya,ta,ra)->void:
-		scene = s
+	func _init(b, xa,ya,ta,ra)->void:
 		board = b
 		x = xa
 		y = ya
@@ -219,7 +214,7 @@ class Tetromino:
 		for p in geo[r%len(geo)]:
 			var tu = board.new_unit(x+p[0],y+p[1], co)
 			tulist.append(tu)
-			scene.add_child(tu)
+			board.add_child(tu)
 		board.draw_shadow_by(tulist)
 	func geo_by_rotate(ra):
 		var geo = TetGeo[t]
@@ -291,17 +286,20 @@ class Tetromino:
 		return false
 
 
-var TetBoard = Board.new(self)
+var TetBoard
 
 var TetMino
 
 func new_tetmino():
-	return Tetromino.new(self,TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
+	return Tetromino.new(TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 
 func _ready() -> void:
+	var width = ProjectSettings.get_setting("display/window/size/viewport_width")
 	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
-	position.y = -2*(height / (TetBoard.BoardH-TetBoard.HiddenTop))
-	$Score.position.y = -position.y
+	var shift = Board.HiddenTop*(height / (Board.BoardH-Board.HiddenTop))
+	TetBoard = Board.new(width,height + shift )
+	add_child(TetBoard)
+	TetBoard.position.y = -shift
 	randomize()
 	TetMino = new_tetmino()
 
