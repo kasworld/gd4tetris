@@ -5,10 +5,10 @@ class Board extends Node2D:
 	const BoardScale = 1
 	const BoardW = 10*BoardScale
 	const BoardH = 20*BoardScale+HiddenTop
-	var Board2ScreenW  # screen board ratio
-	var Board2ScreenH  # screen board ratio
-	var UnitBorderSize
-	func MakeUnit():
+	var Board2ScreenW  :int # screen board ratio
+	var Board2ScreenH  :int # screen board ratio
+	var UnitBorderSize :int
+	func MakeUnit()->Polygon2D:
 		var tu = Polygon2D.new()
 		tu.set_polygon( PackedVector2Array([
 			Vector2(UnitBorderSize,UnitBorderSize),
@@ -23,8 +23,8 @@ class Board extends Node2D:
 	var fulllines = []
 	var shadow = []
 	var shadow_color= Color.DIM_GRAY
-	var score
-	func new_shadow():
+	var score :int
+	func new_shadow()->void:
 		for i in 4:
 			var o = new_unit(0,0,shadow_color)
 			shadow.append(o)
@@ -40,7 +40,7 @@ class Board extends Node2D:
 		new_shadow()
 		new_board()
 
-	func new_board():
+	func new_board()->void:
 		score = 0
 		board = []
 		board.resize(BoardW)
@@ -49,7 +49,7 @@ class Board extends Node2D:
 			board[i].resize(BoardH)
 		show_shadow(false)
 
-	func clear_board():
+	func clear_board()->void:
 		for row in board:
 			for o in row:
 				if o != null:
@@ -57,7 +57,7 @@ class Board extends Node2D:
 					free_unit.push_back(o)
 		new_board()
 
-	func new_unit(x,y,co):
+	func new_unit(x,y,co)->Polygon2D:
 		var tu
 		if len(free_unit) == 0 :
 			tu =  MakeUnit()
@@ -80,7 +80,7 @@ class Board extends Node2D:
 		return true
 
 	# 이동이 끝난 것을 보드 관리로 이관
-	func set_to_board(tulist):
+	func set_to_board(tulist)->void:
 		if !can_set_to_board(tulist):
 			print("fail to set_to_board ",tulist)
 			return
@@ -114,7 +114,7 @@ class Board extends Node2D:
 			fulllines.append(y)
 		return is_full
 
-	func remove_fulllines():
+	func remove_fulllines()->void:
 		if fulllines.size() == 0 :
 			return
 		var sc = 0
@@ -128,7 +128,7 @@ class Board extends Node2D:
 			scroll_down_column(x)
 		fulllines = []
 
-	func scroll_down_column(x):
+	func scroll_down_column(x)->void:
 		var fillarray = []
 		fillarray.resize(fulllines.size())
 		for yl in fulllines:
@@ -140,7 +140,7 @@ class Board extends Node2D:
 		for yl in range(fulllines.size(),fulllines[0]+1):
 			fix_unitpos(x,yl)
 
-	func fix_unitpos(x,y):
+	func fix_unitpos(x,y)->void:
 		if board[x][y] != null:
 			board[x][y].position = Vector2(x*Board2ScreenW, y*Board2ScreenH)
 
@@ -150,23 +150,23 @@ class Board extends Node2D:
 	func empty_at(x,y)->bool:
 		return board[x][y] == null
 
-	func rand_x():
+	func rand_x()->int:
 		return randi_range(0,BoardW)
 
-	func rand_y():
+	func rand_y()->int:
 		return randi_range(0,BoardH)
 
-	func draw_shadow_by(tulist):
+	func draw_shadow_by(tulist)->void:
 		for i in tulist.size():
 			shadow[i].position = tulist[i].position
 		down_to_can(shadow)
 		show_shadow(true)
 
-	func show_shadow(b :bool):
+	func show_shadow(b :bool)->void:
 		for o in shadow:
 			o.visible = b
 
-	func down_to_can(tulist): # also harddrop
+	func down_to_can(tulist)->void: # also harddrop
 		while can_set_to_board(tulist):
 			for o in tulist:
 				o.position.y += Board2ScreenH
@@ -216,6 +216,7 @@ class Tetromino:
 			tulist.append(tu)
 			board.add_child(tu)
 		board.draw_shadow_by(tulist)
+
 	func geo_by_rotate(ra):
 		var geo = TetGeo[t]
 		return geo[ra%len(geo)]
@@ -226,7 +227,7 @@ class Tetromino:
 			poslist.append(tu.position)
 		return poslist
 
-	func poslist2tulist(poslist):
+	func poslist2tulist(poslist)->void:
 		for i in tulist.size():
 			tulist[i].position = poslist[i]
 
@@ -286,21 +287,20 @@ class Tetromino:
 		return false
 
 
-var TetBoard
-
-var TetMino
+var TetBoard :Board
+var TetMino :Tetromino
 
 func new_tetmino():
 	return Tetromino.new(TetBoard,TetBoard.BoardW/2-1,0,Tetromino.rand_type(),0)
 
 func _ready() -> void:
+	randomize()
 	var width = ProjectSettings.get_setting("display/window/size/viewport_width")
 	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
 	var shift = Board.HiddenTop*(height / (Board.BoardH-Board.HiddenTop))
 	TetBoard = Board.new(width,height + shift )
 	add_child(TetBoard)
 	TetBoard.position.y = -shift
-	randomize()
 	TetMino = new_tetmino()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
@@ -310,7 +310,7 @@ func _process(delta: float) -> void:
 	$Score.text = "%d" % TetBoard.score
 	pass
 
-func handle_input():
+func handle_input()->void:
 	if Input.is_action_just_pressed("move_right"):
 		TetMino.move_right()
 	if Input.is_action_just_pressed("move_left"):
@@ -323,7 +323,7 @@ func handle_input():
 		TetBoard.down_to_can(TetMino.tulist)
 
 
-func force_down():
+func force_down()->void:
 	$GameOver.visible = false
 	var act_success = TetMino.move_down()
 	if !act_success:
@@ -338,7 +338,7 @@ func _on_force_down_timer_timeout() -> void:
 
 ############# test functions
 
-func removelinetest():
+func removelinetest()->void:
 	for i in range(TetBoard.BoardW):
 		TetBoard.add_unit_to_board(
 			TetBoard.rand_x(),TetBoard.rand_y(),
@@ -346,7 +346,7 @@ func removelinetest():
 			)
 	TetBoard.remove_fulllines()
 
-func act_random():
+func act_random()->void:
 	var act = randi_range(0,4)
 	match act:
 		0: # rotate
