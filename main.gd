@@ -217,7 +217,6 @@ class Tetromino extends Node2D:
 			var tu = board.new_unit(x+p[0],y+p[1], co)
 			tulist.append(tu)
 			board.add_child(tu)
-		board.draw_shadow_by(tulist)
 
 	func geo_by_rotate(ra :int)->Array:
 		var geo = TetGeo[t]
@@ -305,15 +304,18 @@ func _ready() -> void:
 	var width = ProjectSettings.get_setting("display/window/size/viewport_width")
 	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
 	var shift = Board.HiddenTop*(height / (Board.BoardH-Board.HiddenTop))
-	tet_board = Board.new(width/3*2,height + shift )
+	var boardWidth = width/3*2
+	tet_board = Board.new(boardWidth,height + shift )
 	add_child(tet_board)
 	tet_board.position.y = -shift
 
-	var bgImage = Image.create(width/3*2,height,true,Image.FORMAT_RGBA8)
+	var bgImage = Image.create(boardWidth,height,true,Image.FORMAT_RGBA8)
 	bgImage.fill(Color.BLACK)
 	var bgTexture = ImageTexture.create_from_image(bgImage)
 	$BGSprite2D.texture = bgTexture
 
+	$Score.position.x = boardWidth + tet_board.board2screenW *2
+	$Score.position.y = tet_board.board2screenH *0
 
 	tet_mino = Tetromino.new(self, tet_board)
 	tet_mino_next = Tetromino.new(self, tet_board)
