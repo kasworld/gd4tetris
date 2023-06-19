@@ -1,11 +1,15 @@
 extends Node2D
 
+
 class Board extends Node2D:
 	const HiddenTop = 2
 	const BoardW = 10
 	const BoardH = 20+HiddenTop
 	const ShadowColor = Color.DIM_GRAY
 	const TuBorderSize = 4
+
+	var line_del_effect = preload("res://line_del_effect.tscn")
+	var lineeffect = []
 
 	var board2screenW  :int # screen board ratio
 	var board2screenH  :int # screen board ratio
@@ -34,6 +38,11 @@ class Board extends Node2D:
 	func _init(width :int,height :int) -> void:
 		board2screenW = width / BoardW
 		board2screenH = height / BoardH
+		for i in BoardH:
+			var lde = line_del_effect.instantiate()
+			add_child(lde)
+			lde.position.y = i * board2screenH+board2screenH/2
+			lineeffect.append(lde)
 		new_shadow()
 		new_board()
 
@@ -121,9 +130,17 @@ class Board extends Node2D:
 
 		fulllines.sort()
 		fulllines.reverse()
+
+		for y in fulllines:
+			linedel_effect(y)
+
 		for x in BoardW:
 			scroll_down_column(x)
 		fulllines = []
+
+	func linedel_effect(y :int)->void:
+		lineeffect[y].emitting = true
+		pass
 
 	func scroll_down_column(x :int)->void:
 		var fillarray = []
@@ -169,7 +186,6 @@ class Board extends Node2D:
 				o.position.y += board2screenH
 		for o in tulist:
 			o.position.y -= board2screenH
-
 
 class Tetromino extends Node2D:
 	enum {TypeI,TypeT,TypeJ,TypeL,TypeS,TypeZ,TypeO,TypeEnd }
@@ -308,7 +324,6 @@ class Tetromino extends Node2D:
 			return true
 		return false
 
-
 var tet_board :Board
 var tet_mino_move :Tetromino
 var tet_mino_next :Tetromino
@@ -334,18 +349,23 @@ func _ready() -> void:
 	$Score.position.x = boardWidth + tet_board.board2screenW *2
 	$Score.position.y = tet_board.board2screenH *0
 
+	start_game()
+
+func start_game():
 	tet_mino_next = Tetromino.new(self, tet_board)
 	tet_mino_next.make_tmino(tet_board.BoardW+1,4,Tetromino.rand_type(),0)
 	tet_mino_move = Tetromino.new(self, tet_board)
 	copy_tmino_move_from_next()
 	tet_mino_next.change_type(Tetromino.rand_type())
 
-
+func game_over():
+	$GameOver.visible = true
+	tet_board.clear_board()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-#	removelinetest()
-	handle_input()
+	removelinetest()
+#	handle_input()
 	$Score.text = "%d" % tet_board.score
 	pass
 
@@ -370,11 +390,10 @@ func force_down()->void:
 		copy_tmino_move_from_next()
 		tet_mino_next.change_type(Tetromino.rand_type())
 		if !tet_board.can_set_to_board(tet_mino_move.tulist):
-			$GameOver.visible = true
-			tet_board.clear_board()
-
+			game_over()
 func _on_force_down_timer_timeout() -> void:
-	force_down()
+#	force_down()
+	pass
 
 ############# test functions
 
