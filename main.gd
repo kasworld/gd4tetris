@@ -364,8 +364,8 @@ func game_over():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	removelinetest()
-#	handle_input()
+#	removelinetest()
+	handle_input()
 	$Score.text = "%d" % tet_board.score
 	pass
 
@@ -391,8 +391,9 @@ func force_down()->void:
 		tet_mino_next.change_type(Tetromino.rand_type())
 		if !tet_board.can_set_to_board(tet_mino_move.tulist):
 			game_over()
+
 func _on_force_down_timer_timeout() -> void:
-#	force_down()
+	force_down()
 	pass
 
 ############# test functions

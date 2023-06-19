@@ -48,7 +48,5 @@ z_index = 2
 position = Vector2(389, 470)
 emitting = true
 one_shot = false
-local_coords = true
-trail_enabled = false
 
 [connection signal="timeout" from="ForceDownTimer" to="." method="_on_force_down_timer_timeout"]
