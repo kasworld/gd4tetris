@@ -19,12 +19,22 @@ class Board extends Node2D:
 			Vector2(board2screenW,TuBorderSize),]
 		))
 		return tu
+	func make_del_effect()->Polygon2D:
+		var de = Polygon2D.new()
+		de.set_polygon( PackedVector2Array([
+			Vector2(0,0),
+			Vector2(0,board2screenH),
+			Vector2(BoardW*board2screenW,board2screenH),
+			Vector2(BoardW*board2screenW,0),]
+		))
+		return de
 
 	var board = []		# array [BoardW][BoardH] of TetUnit
 	var free_tulist = []	# reuse tetunit list
 	var fulllines = []
 	var is_del_fulllines :bool
 	var del_fullline_column :int
+	var del_effect = []
 	var shadow = []
 	var score :int
 	func new_shadow()->void:
@@ -37,6 +47,12 @@ class Board extends Node2D:
 	func _init(width :int,height :int) -> void:
 		board2screenW = width / BoardW
 		board2screenH = height / BoardH
+		for y in BoardH:
+			var de = make_del_effect()
+			de.position.y=y*board2screenH
+			de.visible = false
+			del_effect.append(de)
+			add_child(de)
 		new_shadow()
 		new_board()
 
@@ -120,8 +136,9 @@ class Board extends Node2D:
 		if fulllines.size() == 0 :
 			return false
 		var sc = 0
-		for i in fulllines:
-			sc += (BoardH- i) *4
+		for y in fulllines:
+			sc += (BoardH- y) *4
+			del_effect[y].visible = true
 		score += sc* fulllines.size()
 
 		fulllines.sort()
@@ -133,6 +150,8 @@ class Board extends Node2D:
 	func end_remove_fullines()->void:
 		is_del_fulllines = false
 		del_fullline_column = 0
+		for y in fulllines:
+			del_effect[y].visible = false
 		fulllines = []
 
 	func scroll_down_column()->void:
