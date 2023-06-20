@@ -346,9 +346,11 @@ func game_over():
 	$GameOver.visible = true
 	tet_board.clear_board()
 
+
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 #	removelinetest()
+	force_down(delta)
 	handle_input()
 	$Score.text = "%d" % tet_board.score
 	pass
@@ -365,20 +367,20 @@ func handle_input()->void:
 	if Input.is_action_just_pressed("hard_drop"):
 		tet_board.down_to_can(tet_mino_move.tulist)
 
-
-func force_down()->void:
-	$GameOver.visible = false
-	var act_success = tet_mino_move.move_down()
-	if !act_success:
-		tet_board.set_to_board(tet_mino_move.tulist)
-		copy_tmino_move_from_next()
-		tet_mino_next.change_type(Tetromino.rand_type())
-		if !tet_board.can_set_to_board(tet_mino_move.tulist):
-			game_over()
-
-func _on_force_down_timer_timeout() -> void:
-	force_down()
-	pass
+var force_down_sec = 0.5
+var sum_since_last_force_down = 0.0
+func force_down(delta:float)->void:
+	sum_since_last_force_down += delta
+	if sum_since_last_force_down > force_down_sec:
+		sum_since_last_force_down = 0.0
+		$GameOver.visible = false
+		var act_success = tet_mino_move.move_down()
+		if !act_success:
+			tet_board.set_to_board(tet_mino_move.tulist)
+			copy_tmino_move_from_next()
+			tet_mino_next.change_type(Tetromino.rand_type())
+			if !tet_board.can_set_to_board(tet_mino_move.tulist):
+				game_over()
 
 ############# test functions
 
