@@ -23,6 +23,8 @@ class Board extends Node2D:
 	var board = []		# array [BoardW][BoardH] of TetUnit
 	var free_tulist = []	# reuse tetunit list
 	var fulllines = []
+	var is_del_fulllines :bool
+	var del_fullline_column :int
 	var shadow = []
 	var score :int
 	func new_shadow()->void:
@@ -76,8 +78,17 @@ class Board extends Node2D:
 		add_fullline(y)
 		return true
 
+	func can_set_to_board(tulist :Array)->bool:
+		for tu in tulist:
+			var x = tu.position.x / board2screenW
+			var y = tu.position.y / board2screenH
+			if !is_in(x,y) || !empty_at(x,y):
+				return false
+		return true
+
 	# 이동이 끝난 것을 보드 관리로 이관
 	func set_to_board(tulist :Array)->void:
+		assert(!is_del_fulllines)
 		if !can_set_to_board(tulist):
 			print("fail to set_to_board ",tulist)
 			return
@@ -89,17 +100,9 @@ class Board extends Node2D:
 		tulist.resize(0)
 		show_shadow(false)
 		score += 4
-		remove_fulllines()
-
-	func can_set_to_board(tulist :Array)->bool:
-		for tu in tulist:
-			var x = tu.position.x / board2screenW
-			var y = tu.position.y / board2screenH
-			if !is_in(x,y) || !empty_at(x,y):
-				return false
-		return true
 
 	func add_fullline(y :int)->bool:
+		assert(!is_del_fulllines)
 		if fulllines.find(y) != -1:
 			return true
 		var is_full=true
@@ -111,9 +114,11 @@ class Board extends Node2D:
 			fulllines.append(y)
 		return is_full
 
-	func remove_fulllines()->void:
+	func start_remove_fulllines()->bool:
+		if is_del_fulllines:
+			return true
 		if fulllines.size() == 0 :
-			return
+			return false
 		var sc = 0
 		for i in fulllines:
 			sc += (BoardH- i) *4
@@ -121,22 +126,30 @@ class Board extends Node2D:
 
 		fulllines.sort()
 		fulllines.reverse()
+		is_del_fulllines = true
+		del_fullline_column = 0
+		return true
 
-		for x in BoardW:
-			scroll_down_column(x)
+	func end_remove_fullines()->void:
+		is_del_fulllines = false
+		del_fullline_column = 0
 		fulllines = []
 
-	func scroll_down_column(x :int)->void:
+	func scroll_down_column()->void:
+		assert(is_del_fulllines)
 		var fillarray = []
 		fillarray.resize(fulllines.size())
 		for yl in fulllines:
-			if board[x][yl] != null:
-				remove_child(board[x][yl])
-				free_tulist.push_back(board[x][yl])
-			board[x].remove_at(yl)
-		board[x] = fillarray.duplicate() + board[x]
+			if board[del_fullline_column][yl] != null:
+				remove_child(board[del_fullline_column][yl])
+				free_tulist.push_back(board[del_fullline_column][yl])
+			board[del_fullline_column].remove_at(yl)
+		board[del_fullline_column] = fillarray.duplicate() + board[del_fullline_column]
 		for yl in range(fulllines.size(),fulllines[0]+1):
-			fix_tupos(x,yl)
+			fix_tupos(del_fullline_column,yl)
+		del_fullline_column +=1
+		if del_fullline_column == BoardW:
+			end_remove_fullines()
 
 	func fix_tupos(x :int,y :int)->void:
 		if board[x][y] != null:
@@ -165,6 +178,7 @@ class Board extends Node2D:
 			o.visible = b
 
 	func down_to_can(tulist :Array)->void: # also harddrop
+		assert(!is_del_fulllines)
 		while can_set_to_board(tulist):
 			for o in tulist:
 				o.position.y += board2screenH
@@ -349,9 +363,13 @@ func game_over():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-#	removelinetest()
-	force_down(delta)
-	handle_input()
+	if tet_board.start_remove_fulllines() :
+		tet_board.scroll_down_column()
+	else:
+		removelinetest()
+	#	force_down(delta)
+	#	handle_input()
+
 	$Score.text = "%d" % tet_board.score
 	pass
 
@@ -390,7 +408,6 @@ func removelinetest()->void:
 			tet_board.rand_x(),tet_board.rand_y(),
 			Tetromino.TetColor[ Tetromino.rand_type()]
 			)
-	tet_board.remove_fulllines()
 
 func act_random()->void:
 	var act = randi_range(0,4)
