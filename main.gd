@@ -368,9 +368,9 @@ func _process(delta: float) -> void:
 	if tet_board.start_remove_fulllines() :
 		tet_board.scroll_down_column()
 	else:
-		removelinetest()
-	#	force_down(delta)
-	#	handle_input()
+#		removelinetest()
+		handle_input()
+		force_down(delta)
 
 	$Score.text = "%d" % tet_board.score
 	pass
