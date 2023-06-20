@@ -335,6 +335,7 @@ func _ready() -> void:
 	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
 	var shift = Board.HiddenTop*(height / (Board.BoardH-Board.HiddenTop))
 	var boardWidth = width/3*2
+	var remainWidth = width - boardWidth
 	tet_board = Board.new(boardWidth,height + shift )
 	add_child(tet_board)
 	tet_board.position.y = -shift
@@ -344,7 +345,8 @@ func _ready() -> void:
 	var bgTexture = ImageTexture.create_from_image(bgImage)
 	$BGSprite2D.texture = bgTexture
 
-	$Score.position.x = boardWidth + tet_board.board2screenW *2
+	$Score.size.x = remainWidth
+	$Score.position.x = boardWidth  #boardWidth + tet_board.board2screenW *2
 	$Score.position.y = tet_board.board2screenH *0
 
 	start_game()

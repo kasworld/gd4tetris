@@ -24,15 +24,11 @@ vertical_alignment = 1
 
 [node name="Score" type="Label" parent="."]
 z_index = 1
-anchors_preset = 5
-anchor_left = 0.5
-anchor_right = 0.5
-offset_left = -25.5
-offset_right = 25.5
+offset_right = 51.0
 offset_bottom = 127.0
-grow_horizontal = 2
 theme = SubResource("Theme_ftrw6")
 text = "0"
+horizontal_alignment = 1
 
 [node name="BGSprite2D" type="Sprite2D" parent="."]
 centered = false
