@@ -1,7 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://ctaxbpb0eh8lr"]
+[gd_scene load_steps=4 format=3 uid="uid://ctaxbpb0eh8lr"]
 
 [ext_resource type="Script" path="res://main.gd" id="1_bc11j"]
-[ext_resource type="PackedScene" uid="uid://dvt50shn2ut8k" path="res://line_del_effect.tscn" id="2_uasah"]
 
 [sub_resource type="Theme" id="Theme_ghu3p"]
 default_font_size = 80
@@ -41,12 +40,5 @@ text = "0"
 
 [node name="BGSprite2D" type="Sprite2D" parent="."]
 centered = false
-
-[node name="LineDelEffect" parent="." instance=ExtResource("2_uasah")]
-visible = false
-z_index = 2
-position = Vector2(389, 470)
-emitting = true
-one_shot = false
 
 [connection signal="timeout" from="ForceDownTimer" to="." method="_on_force_down_timer_timeout"]

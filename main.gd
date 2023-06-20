@@ -8,9 +8,6 @@ class Board extends Node2D:
 	const ShadowColor = Color.DIM_GRAY
 	const TuBorderSize = 4
 
-	var line_del_effect = preload("res://line_del_effect.tscn")
-	var lineeffect = []
-
 	var board2screenW  :int # screen board ratio
 	var board2screenH  :int # screen board ratio
 	func make_tu()->Polygon2D:
@@ -38,11 +35,6 @@ class Board extends Node2D:
 	func _init(width :int,height :int) -> void:
 		board2screenW = width / BoardW
 		board2screenH = height / BoardH
-		for i in BoardH:
-			var lde = line_del_effect.instantiate()
-			add_child(lde)
-			lde.position.y = i * board2screenH+board2screenH/2
-			lineeffect.append(lde)
 		new_shadow()
 		new_board()
 
@@ -83,7 +75,6 @@ class Board extends Node2D:
 		board[x][y]=tu
 		add_fullline(y)
 		return true
-
 
 	# 이동이 끝난 것을 보드 관리로 이관
 	func set_to_board(tulist :Array)->void:
@@ -131,16 +122,9 @@ class Board extends Node2D:
 		fulllines.sort()
 		fulllines.reverse()
 
-		for y in fulllines:
-			linedel_effect(y)
-
 		for x in BoardW:
 			scroll_down_column(x)
 		fulllines = []
-
-	func linedel_effect(y :int)->void:
-		lineeffect[y].emitting = true
-		pass
 
 	func scroll_down_column(x :int)->void:
 		var fillarray = []
