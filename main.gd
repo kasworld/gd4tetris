@@ -374,8 +374,9 @@ class Game extends Node2D:
 		tet_mino_next = Tetromino.new(tet_board)
 		tet_mino_next.make_tmino(tet_board.BoardW+1,4,Tetromino.rand_type(),0)
 		tet_mino_move = Tetromino.new(tet_board)
-		proceed_next()
+
 		reset_game()
+		proceed_next()
 
 	func proceed_next():
 		tet_mino_move.copy_tmino_from_next(tet_board.BoardW/2-1,0,tet_mino_next)
@@ -389,7 +390,6 @@ class Game extends Node2D:
 		get_parent().get_node("GameOver").visible = true
 		tet_board.clear_board()
 		reset_game()
-
 
 	func handle_input()->void:
 		if Input.is_action_just_pressed("move_right"):
@@ -424,7 +424,6 @@ class Game extends Node2D:
 			force_down()
 
 		get_parent().get_node("Score").text = "%d" % tet_board.score
-		pass
 
 	func removelinetest()->void:
 		for i in range(tet_board.BoardW):
