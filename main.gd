@@ -37,6 +37,7 @@ class Board extends Node2D:
 	var del_effect = []
 	var shadow = []
 	var score :int
+	var line_score :int
 
 	func new_shadow()->void:
 		for i in 4:
@@ -59,6 +60,7 @@ class Board extends Node2D:
 
 	func new_board()->void:
 		score = 0
+		line_score = 0
 		board.resize(BoardW)
 		for i in range(BoardW):
 			board[i] = []
@@ -141,6 +143,7 @@ class Board extends Node2D:
 			sc += (BoardH- y) *4
 			del_effect[y].visible = true
 		score += sc* fulllines.size()
+		line_score += fulllines.size()
 
 		fulllines.sort()
 		fulllines.reverse()
@@ -155,7 +158,8 @@ class Board extends Node2D:
 			del_effect[y].visible = false
 		fulllines = []
 
-	func scroll_down_column()->void:
+	# return true when end
+	func scroll_down_column()->bool:
 		assert(is_del_fulllines)
 		var fillarray = []
 		fillarray.resize(fulllines.size())
@@ -170,6 +174,8 @@ class Board extends Node2D:
 		del_fullline_column +=1
 		if del_fullline_column == BoardW:
 			end_remove_fullines()
+			return true
+		return false
 
 	func fix_tupos(x :int,y :int)->void:
 		if board[x][y] != null:
@@ -372,7 +378,7 @@ class Game extends Node2D:
 		get_parent().get_node("Score").position.y = tet_board.board2screenH *0
 
 		tet_mino_next = Tetromino.new(tet_board)
-		tet_mino_next.make_tmino(tet_board.BoardW+1,4,Tetromino.rand_type(),0)
+		tet_mino_next.make_tmino(tet_board.BoardW+1,8,Tetromino.rand_type(),0)
 		tet_mino_move = Tetromino.new(tet_board)
 
 		reset_game()
@@ -417,13 +423,16 @@ class Game extends Node2D:
 
 	func process(delta: float) -> void:
 		if tet_board.start_remove_fulllines() :
-			tet_board.scroll_down_column()
+			if tet_board.scroll_down_column(): # end del full line
+				force_down_frame -= 1
+				if force_down_frame < 1:
+					force_down_frame = 1
 		else:
 	#		removelinetest()
 			handle_input()
 			force_down()
 
-		get_parent().get_node("Score").text = "%d" % tet_board.score
+		get_parent().get_node("Score").text = "Score:%d\nLine:%d" % [tet_board.score, tet_board.line_score]
 
 	func removelinetest()->void:
 		for i in range(tet_board.BoardW):
