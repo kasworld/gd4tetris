@@ -212,7 +212,7 @@ class Board extends Node2D:
 			o.position.y -= board2screenH
 
 class Tetromino extends Node2D:
-	enum {TypeI,TypeT,TypeJ,TypeL,TypeS,TypeZ,TypeO,TypeEnd }
+	enum {TypeI,TypeT,TypeJ,TypeL,TypeS,TypeZ,TypeO,TypeSize }
 	static func rand_type():
 		return randi_range(0,TypeO )
 	const TetGeo = {
@@ -234,6 +234,16 @@ class Tetromino extends Node2D:
 		TypeJ: Color.MAGENTA,
 		TypeL: Color.ORANGE,
 	}
+	const TetName = {
+		TypeO: "O",
+		TypeI: "I",
+		TypeS: "S",
+		TypeZ: "Z",
+		TypeT: "T",
+		TypeJ: "J",
+		TypeL: "L",
+	}
+
 	var board : Board # board to check
 	var tulist = []
 	var x : int # x in board
@@ -354,6 +364,7 @@ class Game extends Node2D:
 	var tet_mino_next :Tetromino
 	var force_down_frame :int
 	var since_last_force_down_frame :int
+	var tmino_type_stat = []
 
 	func _init()->void:
 		randomize()
@@ -374,11 +385,11 @@ class Game extends Node2D:
 		get_parent().get_node("BGSprite2D").texture = bgTexture
 
 		get_parent().get_node("Score").size.x = remainWidth
-		get_parent().get_node("Score").position.x = boardWidth  #boardWidth + tet_board.board2screenW *2
-		get_parent().get_node("Score").position.y = tet_board.board2screenH *0
+		get_parent().get_node("Score").position.x = boardWidth
+		get_parent().get_node("Score").position.y = tet_board.board2screenH *4
 
 		tet_mino_next = Tetromino.new(tet_board)
-		tet_mino_next.make_tmino(tet_board.BoardW+1,8,Tetromino.rand_type(),0)
+		tet_mino_next.make_tmino(tet_board.BoardW+1,2,Tetromino.rand_type(),0)
 		tet_mino_move = Tetromino.new(tet_board)
 
 		reset_game()
@@ -386,11 +397,16 @@ class Game extends Node2D:
 
 	func proceed_next():
 		tet_mino_move.copy_tmino_from_next(tet_board.BoardW/2-1,0,tet_mino_next)
+		tmino_type_stat[tet_mino_move.t] +=1
 		tet_mino_next.change_type(Tetromino.rand_type())
 
 	func reset_game():
 		force_down_frame = 60
 		since_last_force_down_frame = 0
+		tmino_type_stat = []
+		tmino_type_stat.resize(tet_mino_move.TypeSize)
+		for i in tet_mino_move.TypeSize:
+			tmino_type_stat[i] = 0
 
 	func game_over():
 		get_parent().get_node("GameOver").visible = true
@@ -432,7 +448,10 @@ class Game extends Node2D:
 			handle_input()
 			force_down()
 
-		get_parent().get_node("Score").text = "Score:%d\nLine:%d" % [tet_board.score, tet_board.line_score]
+		var scoreStr = "Score:%d\nLine:%d\n" % [tet_board.score, tet_board.line_score]
+		for i in tmino_type_stat.size():
+			scoreStr += "%s:%d\n" % [Tetromino.TetName[i],tmino_type_stat[i]]
+		get_parent().get_node("Score").text = scoreStr
 
 	func removelinetest()->void:
 		for i in range(tet_board.BoardW):
