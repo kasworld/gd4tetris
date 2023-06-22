@@ -2,23 +2,20 @@ extends Node2D
 
 func _ready() -> void:
 	randomize()
-	var width = ProjectSettings.get_setting("display/window/size/viewport_width")
-	var height =  ProjectSettings.get_setting("display/window/size/viewport_height")
-	var shift = Board.HiddenTop*(height / (Board.BoardH-Board.HiddenTop))
-	var boardWidth = width/3*2
-	var remainWidth = width - boardWidth
-	tet_board = Board.new(boardWidth,height + shift )
+	var vpsize = get_viewport_rect().size
+	var shift = Board.HiddenTop*(vpsize.y / (Board.BoardH-Board.HiddenTop))
+	var boardWidth = vpsize.x/3*2
+	var remainWidth = vpsize.x - boardWidth
+	tet_board = Board.new(boardWidth,vpsize.y + shift )
 	add_child(tet_board)
 	tet_board.position.y = -shift
 
-	var bgImage = Image.create(boardWidth,height,true,Image.FORMAT_RGBA8)
-	bgImage.fill(Color.BLACK)
-	var bgTexture = ImageTexture.create_from_image(bgImage)
-	get_node("BGSprite2D").texture = bgTexture
+	$ColorRect.size.x = boardWidth
+	$ColorRect.size.y = vpsize.y
 
-	get_node("Score").size.x = remainWidth
-	get_node("Score").position.x = boardWidth
-	get_node("Score").position.y = tet_board.board2screenH *4
+	$Score.size.x = remainWidth
+	$Score.position.x = boardWidth
+	$Score.position.y = tet_board.board2screenH *4
 
 	tet_mino_next = Tetromino.new(tet_board)
 	tet_mino_next.make_tmino(tet_board.BoardW+1,2,Tetromino.rand_type(),0)
@@ -42,7 +39,7 @@ func _process(delta: float) -> void:
 	var scoreStr = "Score:%d\nLine:%d\n" % [tet_board.score, tet_board.line_score]
 	for i in tmino_type_stat.size():
 		scoreStr += "%s:%d\n" % [Tetromino.TetName[i],tmino_type_stat[i]]
-	get_node("Score").text = scoreStr
+	$Score.text = scoreStr
 
 var tet_board :Board
 var tet_mino_move :Tetromino

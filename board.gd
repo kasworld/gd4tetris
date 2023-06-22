@@ -14,10 +14,10 @@ const HiddenTop = 2
 const BoardW = 10
 const BoardH = 20+HiddenTop
 const ShadowColor = Color.DIM_GRAY
-const TuBorderSize = 4
+const TuBorderSize = 4.0
 
-var board2screenW  :int # screen board ratio
-var board2screenH  :int # screen board ratio
+var board2screenW  :float # screen board ratio
+var board2screenH  :float # screen board ratio
 func make_tu()->Polygon2D:
 	var tu = Polygon2D.new()
 	tu.set_polygon( PackedVector2Array([
@@ -54,7 +54,7 @@ func new_shadow()->void:
 		add_child(o)
 	show_shadow(false)
 
-func _init(width :int,height :int) -> void:
+func _init(width :float,height :float) -> void:
 	board2screenW = width / BoardW
 	board2screenH = height / BoardH
 	for y in BoardH:
