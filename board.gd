@@ -5,7 +5,6 @@ class_name Board extends Node2D
 func _ready() -> void:
 	pass # Replace with function body.
 
-
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
 	pass
@@ -14,7 +13,7 @@ const HiddenTop = 2
 const BoardW = 10
 const BoardH = 20+HiddenTop
 const ShadowColor = Color.DIM_GRAY
-const TuBorderSize = 4.0
+const TuBorderSize = 1.0
 
 var board2screenW  :float # screen board ratio
 var board2screenH  :float # screen board ratio
@@ -38,7 +37,6 @@ func make_del_effect()->Polygon2D:
 	return de
 
 var board = []		# array [BoardW][BoardH] of TetUnit
-var free_tulist = []	# reuse tetunit list
 var fulllines = []
 var is_del_fulllines :bool
 var del_fullline_column :int
@@ -80,15 +78,11 @@ func clear_board()->void:
 		for o in row:
 			if o != null:
 				remove_child(o)
-				free_tulist.push_back(o)
+				o.queue_free()
 	new_board()
 
 func new_tu(x :int,y :int,co :Color)->Polygon2D:
-	var tu
-	if len(free_tulist) == 0 :
-		tu =  make_tu()
-	else:
-		tu = free_tulist.pop_back()
+	var tu =  make_tu()
 	tu.position.x = x * board2screenW
 	tu.position.y = y * board2screenH
 	tu.set_color(co )
@@ -174,7 +168,7 @@ func scroll_down_column()->bool:
 	for yl in fulllines:
 		if board[del_fullline_column][yl] != null:
 			remove_child(board[del_fullline_column][yl])
-			free_tulist.push_back(board[del_fullline_column][yl])
+			board[del_fullline_column][yl].queue_free()
 		board[del_fullline_column].remove_at(yl)
 	board[del_fullline_column] = fillarray.duplicate() + board[del_fullline_column]
 	for yl in range(fulllines.size(),fulllines[0]+1):
