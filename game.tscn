@@ -1,6 +1,6 @@
-[gd_scene load_steps=5 format=3 uid="uid://ctaxbpb0eh8lr"]
+[gd_scene load_steps=5 format=3 uid="uid://d3u23e11x7ch7"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_bc11j"]
+[ext_resource type="Script" path="res://game.gd" id="1_8oegj"]
 
 [sub_resource type="Theme" id="Theme_ghu3p"]
 default_font_size = 80
@@ -11,8 +11,8 @@ default_font_size = 80
 default_font = SubResource("SystemFont_hhl4i")
 default_font_size = 50
 
-[node name="Main" type="Node2D"]
-script = ExtResource("1_bc11j")
+[node name="Game" type="Node2D"]
+script = ExtResource("1_8oegj")
 
 [node name="GameOver" type="Label" parent="."]
 visible = false
