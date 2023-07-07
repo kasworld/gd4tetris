@@ -1,4 +1,4 @@
-# godot 4로 만드는 테트리스 
+# godot 4.1 로 만드는 테트리스 
 
 동영상 https://youtube.com/shorts/RmX1bJMoyxo?feature=share
 
