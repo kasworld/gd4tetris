@@ -1,6 +1,7 @@
-[gd_scene load_steps=5 format=3 uid="uid://d3u23e11x7ch7"]
+[gd_scene load_steps=6 format=3 uid="uid://d3u23e11x7ch7"]
 
 [ext_resource type="Script" path="res://game.gd" id="1_8oegj"]
+[ext_resource type="PackedScene" uid="uid://c6cct2gj2a3im" path="res://timed_message/timed_message.tscn" id="2_p8r6y"]
 
 [sub_resource type="Theme" id="Theme_ghu3p"]
 default_font_size = 80
@@ -37,3 +38,6 @@ vertical_alignment = 1
 offset_right = 40.0
 offset_bottom = 40.0
 color = Color(0, 0, 0, 1)
+
+[node name="TimedMessage" parent="." instance=ExtResource("2_p8r6y")]
+visible = false

@@ -1,0 +1,29 @@
+[gd_scene load_steps=3 format=3 uid="uid://c6cct2gj2a3im"]
+
+[ext_resource type="Script" path="res://timed_message/timed_message.gd" id="1_4npvt"]
+[ext_resource type="Theme" uid="uid://c2mukxm1c10ti" path="res://timed_message/timed_message.tres" id="1_d10pc"]
+
+[node name="TimedMessage" type="PanelContainer"]
+offset_right = 358.0
+offset_bottom = 62.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme = ExtResource("1_d10pc")
+script = ExtResource("1_4npvt")
+
+[node name="Timer" type="Timer" parent="."]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="VersionLabel" type="Label" parent="VBoxContainer"]
+layout_mode = 2
+text = "version string here"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="Label" type="RichTextLabel" parent="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]

@@ -2,16 +2,16 @@ extends Node2D
 
 func _ready() -> void:
 	randomize()
-	var vpsize = get_viewport_rect().size
-	var shift = Board.HiddenTop*(vpsize.y / (Board.BoardH-Board.HiddenTop))
-	var boardWidth = vpsize.x/3*2
-	var remainWidth = vpsize.x - boardWidth
-	tet_board = Board.new(boardWidth,vpsize.y + shift )
+	var vp_rect = get_viewport_rect()
+	var shift = Board.HiddenTop*(vp_rect.size.y / (Board.BoardH-Board.HiddenTop))
+	var boardWidth = vp_rect.size.x/3*2
+	var remainWidth = vp_rect.size.x - boardWidth
+	tet_board = Board.new(boardWidth,vp_rect.size.y + shift )
 	add_child(tet_board)
 	tet_board.position.y = -shift
 
 	$ColorRect.size.x = boardWidth
-	$ColorRect.size.y = vpsize.y
+	$ColorRect.size.y = vp_rect.size.y
 
 	$Score.size.x = remainWidth
 	$Score.position.x = boardWidth
@@ -23,6 +23,11 @@ func _ready() -> void:
 
 	reset_game()
 	proceed_next()
+
+	var msgrect = Rect2( vp_rect.size.x * 0.2 ,vp_rect.size.y * 0.4 , vp_rect.size.x * 0.6 , vp_rect.size.y * 0.2   )
+	$TimedMessage.init(msgrect, tr("gd4tetris 2.0"))
+	$TimedMessage.show_message("시작합니다.")
+
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
