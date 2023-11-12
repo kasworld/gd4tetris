@@ -13,7 +13,8 @@ config_version=5
 config/name="gd4tetris"
 run/main_scene="res://game.tscn"
 config/features=PackedStringArray("4.1", "GL Compatibility")
-config/icon="res://icon.svg"
+boot_splash/image="res://icon.png"
+boot_splash/fullsize=false
 
 [display]
 
@@ -58,3 +59,4 @@ hard_drop={
 [rendering]
 
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true

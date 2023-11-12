@@ -24,9 +24,9 @@ func _ready() -> void:
 	reset_game()
 	proceed_next()
 
-	var msgrect = Rect2( vp_rect.size.x * 0.2 ,vp_rect.size.y * 0.4 , vp_rect.size.x * 0.6 , vp_rect.size.y * 0.2   )
-	$TimedMessage.init(msgrect, tr("gd4tetris 2.0"))
-	$TimedMessage.show_message("시작합니다.")
+	var msgrect = Rect2( vp_rect.size.x * 0.1 ,vp_rect.size.y * 0.4 , vp_rect.size.x * 0.8 , vp_rect.size.y * 0.2   )
+	$TimedMessage.init(msgrect, tr("gd4tetris 2.0.1"))
+	$TimedMessage.show_message("Copyright 2023 SeukWon Kang (kasworld@gmail.com)")
 
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.

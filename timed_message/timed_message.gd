@@ -4,7 +4,7 @@ func init(rt :Rect2, ver :String)->void:
 	position = rt.position
 	size = rt.size
 	$VBoxContainer/VersionLabel.text = ver
-	theme.default_font_size = rt.size.y /4
+	theme.default_font_size = rt.size.y /6
 
 func show_message(msg :String, sec :float = 3)->void:
 	$VBoxContainer/Label.text = msg
